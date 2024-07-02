@@ -33,17 +33,18 @@
   installShellFiles,
   less,
   lib,
+  libb2,
   makeWrapper,
   ncurses,
+  openssl,
   stdenv,
   zlib,
 }: let
   ucm = "$out/bin/ucm";
-  ui = "$out/bin/ui";
 in
   stdenv.mkDerivation rec {
     pname = "unison-code-manager";
-    version = "0.5.21";
+    version = "0.5.23";
 
     src = let
       srcUrl = os: "https://github.com/unisonweb/unison/releases/download/release/${version}/ucm-${os}.tar.gz";
@@ -54,11 +55,11 @@ in
         if (stdenv.isDarwin)
         then {
           os = "macos";
-          sha256 = "1v0798gpf4zkw5p49zi6whzl2s592hz1ncshci019gayqk5y9lh2";
+          sha256 = "11vxi9z378yag5a6pm372l13zkna61lnbbnnc3yxamm5033ycqlf";
         }
         else {
           os = "linux";
-          sha256 = "0y5c5krnk6xij3cnmn370splbksvr7841v72xf1n6xkxh1yy8acy";
+          sha256 = "1ya7s3sr21cd0qqx9az5y1m10zlrfy7v8m8f2m8avcblafpbqs85";
         };
     in
       fetchurl {
@@ -85,13 +86,16 @@ in
     binPath = lib.makeBinPath buildInputs;
 
     installPhase = ''
-      install -D -m555 -T unison/unison ${ucm}
+      mkdir -p $out/{bin,lib}
+      mv runtime $out/lib/runtime
+      mv unison $out/unison
+      mv ui $out/ui
 
-      mv ui ${ui}
-
-      wrapProgram ${ucm} \
-        --set-default UCM_WEB_UI ${ui} \
-        --prefix PATH : ${binPath}
+      makeWrapper $out/unison/unison ${ucm} \
+        --prefix PATH : ${binPath} \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libb2 openssl ]} \
+        --add-flags "--runtime-path $out/lib/runtime/bin/unison-runtime" \
+        --set-default UCM_WEB_UI "$out/ui"
     '';
 
     postFixup = ''
@@ -103,9 +107,10 @@ in
 
     installCheckPhase = ''
       export XDG_DATA_HOME="$TMP/.local/share"
-      $out/bin/ucm version | grep -q 'ucm version:' || \
+      echo "ucm version:"
+      ${ucm} version | grep -q 'unison version:' || \
         { echo 1>&2 'ERROR: ucm is not the expected version or does not function properly'; exit 1; }
-      echo 'ls' | PATH="" $out/bin/ucm --codebase-create $TMP > /dev/null || \
+      echo 'ls' | PATH="" ${ucm} --codebase-create $TMP > /dev/null || \
         { echo 1>&2 'ERROR: could not run ls on a fresh ucm codebase'; exit 1; }
     '';
 
