@@ -44,7 +44,7 @@
 in
   stdenv.mkDerivation rec {
     pname = "unison-code-manager";
-    version = "0.5.23";
+    version = "0.5.24";
 
     src = let
       srcUrl = os: "https://github.com/unisonweb/unison/releases/download/release/${version}/ucm-${os}.tar.gz";
@@ -55,11 +55,11 @@ in
         if (stdenv.isDarwin)
         then {
           os = "macos";
-          sha256 = "11vxi9z378yag5a6pm372l13zkna61lnbbnnc3yxamm5033ycqlf";
+          sha256 = "5LVcN7ly0n68DFqIjA8EJabZa3WwJf1ueqgJ+gPHNbA=";
         }
         else {
           os = "linux";
-          sha256 = "1ya7s3sr21cd0qqx9az5y1m10zlrfy7v8m8f2m8avcblafpbqs85";
+          sha256 = "nCNmUYkBWhXL2eN+uQblf7oPkiVwfAKi6v+Cb9Co19g=";
         };
     in
       fetchurl {
