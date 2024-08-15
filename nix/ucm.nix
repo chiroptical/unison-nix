@@ -36,6 +36,7 @@
   libb2,
   makeWrapper,
   ncurses,
+  curl,
   openssl,
   stdenv,
   zlib,
@@ -93,7 +94,7 @@ in
 
       makeWrapper $out/unison/unison ${ucm} \
         --prefix PATH : ${binPath} \
-        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libb2 openssl ]} \
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libb2 openssl curl ]} \
         --add-flags "--runtime-path $out/lib/runtime/bin/unison-runtime" \
         --set-default UCM_WEB_UI "$out/ui"
     '';
